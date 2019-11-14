@@ -24,9 +24,10 @@ pool.connect()
  * @return {Promise<{}>} A promise to the user.
  */
 const getUserWithEmail = function(email) {
-  const text = `SELECT *
-                FROM users
-                WHERE email = $1`;
+  const text = `
+  SELECT *
+  FROM users
+  WHERE email = $1`;
   const values = [email];
   
   return pool.query(text, values)
@@ -68,17 +69,24 @@ const getUserWithId = function(id) {
 }
 exports.getUserWithId = getUserWithId;
 
-
 /**
  * Add a new user to the database.
  * @param {{name: string, password: string, email: string}} user
  * @return {Promise<{}>} A promise to the user.
  */
 const addUser =  function(user) {
-  const userId = Object.keys(users).length + 1;
-  user.id = userId;
-  users[userId] = user;
-  return Promise.resolve(user);
+  
+  const text = `INSERT INTO users (name, email, password)
+  VALUES ($1, $2, $3)
+  RETURNING *;
+  `;
+  const values = [user.name, user.email, user.password];
+
+  return pool.query(text, values)
+    .then((res) => {
+      console.log(res.rows[0]);
+      return res.rows[0];
+    })
 }
 exports.addUser = addUser;
 
