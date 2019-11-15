@@ -29,12 +29,24 @@ $(() => {
 
   $searchPropertyForm.on('submit', function(event) {
     event.preventDefault();
-    const data = $(this).serialize();
-
-    getAllListings(data).then(function( json ) {
-      propertyListings.addProperties(json.properties);
-      views_manager.show('listings');
+    
+    let data = $(this).serialize();
+    getMyDetails()
+    .then(function( json ) {
+      if (json.user) {
+        data +=`user_id=${json.user.id}`;
+      }
+      getAllListings(data).then(function( json ) {
+      
+        propertyListings.addProperties(json.properties);
+        views_manager.show('listings');
+      });
+      
+    })
+    .catch(e => {
+      console.log({e});
     });
+    
   });
 
   $('body').on('click', '#search-property-form__cancel', function() {
